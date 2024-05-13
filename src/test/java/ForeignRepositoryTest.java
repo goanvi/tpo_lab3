@@ -1,7 +1,4 @@
-import ifmo.page.ForeignRepositoryPage;
-import ifmo.page.HomePage;
-import ifmo.page.LoggedInHomePage;
-import ifmo.page.LoginPage;
+import ifmo.page.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -11,6 +8,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 public class ForeignRepositoryTest extends PageTestBase {
+    static final By NEW_FILE_ERROR_TITLE_BY = By.xpath("//h3[contains(@class,'eRjmst')]");
+    static final By CLOSE_ISSUE_BUTTON_BY = By.xpath("//button[@name='comment_and_close']");
+    static final By ISSUE_TITLE_BY = By.xpath("//bdi[contains(@class,'js-issue-title')]");
+    static final By PULL_REQUEST_BUTTON_BY = By.xpath("//button[contains(@data-ga-click,'request')]");
+    static final By FORK_BUTTON_BY = By.xpath("//button[@data-test-selector='repo-delete-proceed-button']");
+    static final By CREATE_FORK_ERROR_TITLE_BY = By.xpath("//div[contains(@class,'eVJSSH')]");
     static String user = "goanvi";
     static String repository = "tpo";
     static String issueName = "test issue";
@@ -18,7 +21,14 @@ public class ForeignRepositoryTest extends PageTestBase {
     HomePage homePage;
     LoginPage loginPage;
     LoggedInHomePage loggedInHomePage;
+    PersonalRepositoryPage personalRepositoryPage;
     ForeignRepositoryPage foreignRepository;
+    BranchPage branchPage;
+    NewFilePage newFilePage;
+    PullRequestPage pullRequestPage;
+    NewRepositoryPage newRepositoryPage;
+    IssuePage issuePage;
+    ForkPage forkPage;
 
     @BeforeEach
     void goToRepository() {
@@ -30,7 +40,7 @@ public class ForeignRepositoryTest extends PageTestBase {
         foreignRepository.addFile();
         assertEquals(
                 "You need to fork this repository to propose changes.",
-                driver.findElement(By.xpath("//h3[contains(@class,'eRjmst')]")).getText().trim()
+                driver.findElement(NEW_FILE_ERROR_TITLE_BY).getText().trim()
         );
     }
 
@@ -39,9 +49,9 @@ public class ForeignRepositoryTest extends PageTestBase {
         foreignRepository.createIssue(issueName);
         assertEquals(
                 issueName,
-                driver.findElement(By.xpath("//bdi[contains(@class,'js-issue-title')]")).getText().trim()
+                driver.findElement(ISSUE_TITLE_BY).getText().trim()
         );
-        driver.findElement(By.xpath("//button[@name='comment_and_close']")).click();
+        driver.findElement(CLOSE_ISSUE_BUTTON_BY).click();
     }
 
     @TestWithAllDrivers
@@ -50,7 +60,7 @@ public class ForeignRepositoryTest extends PageTestBase {
         assertEquals(
                 "true",
                 driver
-                        .findElement(By.xpath("//button[contains(@data-ga-click,'request')]"))
+                        .findElement(PULL_REQUEST_BUTTON_BY)
                         .getAttribute("disabled")
                         .trim()
         );
@@ -63,17 +73,7 @@ public class ForeignRepositoryTest extends PageTestBase {
                 "https://github.com/gnchr/" + forkName,
                 foreignRepository.currentUrl()
         );
-        driver.findElement(By.xpath("//a[@id='settings-tab']")).click();
-        foreignRepository.getWait().until(ExpectedConditions.elementToBeClickable(By.xpath("//button[@data-show-dialog-id='repo-delete-menu-dialog']")));
-        driver.findElement(By.xpath("//button[@data-show-dialog-id='repo-delete-menu-dialog']")).click();
-        foreignRepository.getWait().until(ExpectedConditions.elementToBeClickable(By.xpath("//button[@data-test-selector='repo-delete-proceed-button' and @data-next-stage='2']")));
-        driver.findElement(By.xpath("//button[@data-test-selector='repo-delete-proceed-button' and @data-next-stage='2']")).click();
-        foreignRepository.getWait().until(ExpectedConditions.elementToBeClickable(By.xpath("//button[@data-test-selector='repo-delete-proceed-button' and @data-next-stage='3']")));
-        driver.findElement(By.xpath("//button[@data-test-selector='repo-delete-proceed-button' and @data-next-stage='3']")).click();
-        foreignRepository.getWait().until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@id='verification_field']")));
-        driver.findElement(By.xpath("//input[@id='verification_field']")).sendKeys("gnchr/" + forkName);
-        driver.findElement(By.xpath("//button[@data-test-selector='repo-delete-proceed-button']")).click();
-        foreignRepository.getWait().until(ExpectedConditions.urlContains("repositories"));
+        personalRepositoryPage.removeRepository(forkName);
     }
 
     @TestWithAllDrivers
@@ -81,33 +81,28 @@ public class ForeignRepositoryTest extends PageTestBase {
         foreignRepository.createFork(forkName);
         driver.get("https://github.com/");
         loggedInHomePage.searchRepositoryWithUserFilter(repository, user);
-        driver.findElement(By.xpath("//a[@id='fork-button']")).click();
-        foreignRepository.getWait().until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[contains(@class,'eVJSSH')]")));
+        driver.findElement(FORK_BUTTON_BY).click();
+        foreignRepository.getWait().until(ExpectedConditions.visibilityOfElementLocated(CREATE_FORK_ERROR_TITLE_BY));
         assertEquals(
                 "No available destinations to fork this repository.",
-                driver.findElement(By.xpath("//div[contains(@class,'eVJSSH')]")).getText().trim()
+                driver.findElement(CREATE_FORK_ERROR_TITLE_BY).getText().trim()
         );
-        driver.get("https://github.com/gnchr/" + forkName);
-        foreignRepository.getWait().until(ExpectedConditions.elementToBeClickable(By.xpath("//a[@id='settings-tab']")));
-        driver.findElement(By.xpath("//a[@id='settings-tab']")).click();
-        foreignRepository.getWait().until(ExpectedConditions.elementToBeClickable(By.xpath("//button[@data-show-dialog-id='repo-delete-menu-dialog']")));
-        driver.findElement(By.xpath("//button[@data-show-dialog-id='repo-delete-menu-dialog']")).click();
-        foreignRepository.getWait().until(ExpectedConditions.elementToBeClickable(By.xpath("//button[@data-test-selector='repo-delete-proceed-button' and @data-next-stage='2']")));
-        driver.findElement(By.xpath("//button[@data-test-selector='repo-delete-proceed-button' and @data-next-stage='2']")).click();
-        foreignRepository.getWait().until(ExpectedConditions.elementToBeClickable(By.xpath("//button[@data-test-selector='repo-delete-proceed-button' and @data-next-stage='3']")));
-        driver.findElement(By.xpath("//button[@data-test-selector='repo-delete-proceed-button' and @data-next-stage='3']")).click();
-        foreignRepository.getWait().until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@id='verification_field']")));
-        driver.findElement(By.xpath("//input[@id='verification_field']")).sendKeys("gnchr/" + forkName);
-        driver.findElement(By.xpath("//button[@data-test-selector='repo-delete-proceed-button']")).click();
-        foreignRepository.getWait().until(ExpectedConditions.urlContains("repositories"));
-
+        personalRepositoryPage.removeRepository(forkName);
     }
+
 
     @Override
     protected void preparePages(WebDriver driver) {
         homePage = new HomePage(driver);
         loginPage = new LoginPage(driver, homePage);
         loggedInHomePage = new LoggedInHomePage(driver, loginPage);
-        foreignRepository = new ForeignRepositoryPage(driver, loggedInHomePage);
+        branchPage = new BranchPage(driver);
+        newFilePage = new NewFilePage(driver);
+        pullRequestPage = new PullRequestPage(driver);
+        newRepositoryPage = new NewRepositoryPage(driver);
+        issuePage = new IssuePage(driver);
+        forkPage = new ForkPage(driver);
+        personalRepositoryPage = new PersonalRepositoryPage(driver, loggedInHomePage, branchPage, newFilePage, pullRequestPage, newRepositoryPage);
+        foreignRepository = new ForeignRepositoryPage(driver, loggedInHomePage, issuePage, forkPage);
     }
 }

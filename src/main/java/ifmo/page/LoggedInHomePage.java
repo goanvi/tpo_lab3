@@ -12,6 +12,10 @@ import java.time.Duration;
 
 public class LoggedInHomePage extends Page {
 
+    public static final By NAV_USER_BUTTON_BY = By.xpath("//a[@data-testid='nav-item-users']");
+    public static final By USER_LINK_BY = By.xpath("//a[@class='Link__StyledLink-sc-14289xe-0 cstVDi']");
+    public static final By NAV_REPOSITORY_BUTTON_BY = By.xpath("//a[@data-testid='nav-item-repositories']");
+    public static final By REPOSITORY_LINK_BY = By.xpath("//a[@class='Link__StyledLink-sc-14289xe-0 cstVDi']");
     @FindBy(xpath = "//button[@data-hotkey='s,/']")
     private WebElement searchButton;
 
@@ -37,20 +41,20 @@ public class LoggedInHomePage extends Page {
 
     public void searchUser(String user) {
         searchQuery(user);
-        getWait().until(ExpectedConditions.elementToBeClickable(By.xpath("//a[@data-testid='nav-item-users']")));
-        getDriver().findElement(By.xpath("//a[@data-testid='nav-item-users']")).click();
+        getWait().until(ExpectedConditions.elementToBeClickable(NAV_USER_BUTTON_BY));
+        getDriver().findElement(NAV_USER_BUTTON_BY).click();
         getWait().until(ExpectedConditions.urlContains("users"));
-        getDriver().findElement(By.xpath("//a[@class='Link__StyledLink-sc-14289xe-0 cstVDi']")).click();
+        getDriver().findElement(USER_LINK_BY).click();
         getWait().until(ExpectedConditions.urlToBe("https://github.com/" + user));
 
     }
 
     public void searchRepositoryWithUserFilter(String repository, String user) {
         searchQuery(repository + " owner:" + user);
-        getWait().until(ExpectedConditions.elementToBeClickable(By.xpath("//a[@data-testid='nav-item-repositories']")));
-        getDriver().findElement(By.xpath("//a[@data-testid='nav-item-repositories']")).click();
+        getWait().until(ExpectedConditions.elementToBeClickable(NAV_REPOSITORY_BUTTON_BY));
+        getDriver().findElement(NAV_REPOSITORY_BUTTON_BY).click();
         getWait().until(ExpectedConditions.urlContains("repositories"));
-        getDriver().findElement(By.xpath("//a[@class='Link__StyledLink-sc-14289xe-0 cstVDi']")).click();
+        getDriver().findElement(REPOSITORY_LINK_BY).click();
         getWait().until(ExpectedConditions.urlToBe("https://github.com/" + user + "/" + repository));
     }
 

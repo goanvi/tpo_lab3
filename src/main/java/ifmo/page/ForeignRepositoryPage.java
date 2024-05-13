@@ -8,6 +8,9 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class ForeignRepositoryPage extends Page {
 
+    public static final By CREATE_NEW_FILE_BUTTON_BY = By.xpath("//a[@tabindex='0']");
+    public static final By NEW_ISSUE_BUTTON_BY = By.xpath("//a[@data-hotkey='c']");
+    public static final By NEW_PULL_REQUEST_BUTTON_BY = By.xpath("//a[@data-hotkey='c']");
     LoggedInHomePage loggedInHomePage;
 
     @FindBy(xpath = "//button[@aria-label='Add file' and @data-component='IconButton']")
@@ -22,10 +25,15 @@ public class ForeignRepositoryPage extends Page {
     @FindBy(xpath = "//a[@id='fork-button']")
     WebElement forkButton;
 
+    private final IssuePage issuePage;
+    private final ForkPage forkPage;
 
-    public ForeignRepositoryPage(WebDriver driver, LoggedInHomePage loggedInHomePage) {
+
+    public ForeignRepositoryPage(WebDriver driver, LoggedInHomePage loggedInHomePage, IssuePage issuePage, ForkPage forkPage) {
         super(driver);
         this.loggedInHomePage = loggedInHomePage;
+        this.issuePage = issuePage;
+        this.forkPage = forkPage;
     }
 
     public void goTo(String repository, String user) {
@@ -34,38 +42,28 @@ public class ForeignRepositoryPage extends Page {
 
     public void addFile() {
         addFileButton.click();
-        getWait().until(ExpectedConditions.elementToBeClickable(By.xpath("//a[@tabindex='0']")));
-        getDriver().findElement(By.xpath("//a[@tabindex='0']")).click();
+        getWait().until(ExpectedConditions.elementToBeClickable(CREATE_NEW_FILE_BUTTON_BY));
+        getDriver().findElement(CREATE_NEW_FILE_BUTTON_BY).click();
         getWait().until(ExpectedConditions.urlContains("new"));
     }
 
     public void createIssue(String issueName) {
         issuesTab.click();
-        getWait().until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[@data-hotkey='c']")));
-        getDriver().findElement(By.xpath("//a[@data-hotkey='c']")).click();
-        getWait().until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@id='issue_title']")));
-        getDriver().findElement(By.xpath("//input[@id='issue_title']")).sendKeys(issueName);
-        getDriver().findElement(By.xpath("//button[contains(text(), 'Submit new issue') and contains(@class, 'ml-2')]")).click();
-        getWait().until(ExpectedConditions.not(ExpectedConditions.urlContains("new")));
+        getWait().until(ExpectedConditions.visibilityOfElementLocated(NEW_ISSUE_BUTTON_BY));
+        getDriver().findElement(NEW_ISSUE_BUTTON_BY).click();
+        issuePage.createIssue(issueName);
     }
 
     public void createPullRequest() {
         pullRequestTab.click();
-        getWait().until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[@data-hotkey='c']")));
-        getDriver().findElement(By.xpath("//a[@data-hotkey='c']")).click();
+        getWait().until(ExpectedConditions.visibilityOfElementLocated(NEW_PULL_REQUEST_BUTTON_BY));
+        getDriver().findElement(NEW_PULL_REQUEST_BUTTON_BY).click();
         getWait().until(ExpectedConditions.urlContains("compare"));
     }
 
     public void createFork(String forkName) {
         forkButton.click();
-        getWait().until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@data-testid='repository-name-input']")));
-        WebElement titleField = getDriver().findElement(By.xpath("//input[@data-testid='repository-name-input']"));
-        titleField.clear();
-        titleField.sendKeys(forkName);
-        getWait().until(ExpectedConditions.textToBePresentInElementLocated(By.xpath("//span[@class='Box-sc-g0xbh4-0 lbunpI']"), forkName + " is available."));
-        getDriver().findElement(By.xpath("//button[contains(@class, 'NFBxW') and @type='submit']")).click();
-        getWait().until(ExpectedConditions.urlContains(forkName));
-
+        forkPage.createFork(forkName);
     }
 
 }

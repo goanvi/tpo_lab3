@@ -19,6 +19,8 @@ import java.util.stream.Stream;
 @ExtendWith(CustomParameterResolver.class)
 public abstract class PageTestBase {
 
+    public static final By SIGN_OUT_BUTTON_BY = By.xpath("//input[@value='Sign out']");
+
     static Stream<Arguments> allDrivers() {
         return SeleniumDriver.getDrivers().stream().map(SeleniumDriver::getDriver).map(Arguments::of);
     }
@@ -35,8 +37,8 @@ public abstract class PageTestBase {
     public void quitDriver(WebDriver driver) {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         driver.get("https://github.com/logout");
-        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//input[@value='Sign out']")));
-        driver.findElement(By.xpath("//input[@value='Sign out']")).click();
+        wait.until(ExpectedConditions.elementToBeClickable(SIGN_OUT_BUTTON_BY));
+        driver.findElement(SIGN_OUT_BUTTON_BY).click();
         wait.until(ExpectedConditions.urlToBe("https://github.com/"));
         driver.quit();
     }
